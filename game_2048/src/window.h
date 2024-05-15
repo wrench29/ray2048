@@ -6,7 +6,7 @@
 
 #include <raylib.h>
 
-const float kFontSize = 40.0;
+const int kFontSize = 40;
 
 const unsigned int kWindowWidth = 1280;
 const unsigned int kWindowHeight = 720;
@@ -49,7 +49,7 @@ struct TileMovementAnimation {
 	GameTileType tileType;
 };
 
-struct TileWithPosition {
+struct TileWithAbsolutePosition {
 	float x;
 	float y;
 	GameTileType tileType;
@@ -146,7 +146,7 @@ private:
 	Vector2 calculateTilePosition(int x, int y);
 	Color getTileColor(GameTileType tileType);
 	std::string getTileText(GameTileType tileType);
-	std::vector<TileWithPosition> getCurrentTiles();
+	std::vector<TileWithAbsolutePosition> getCurrentTiles();
 
 public:
 	GameGUI();
@@ -157,7 +157,7 @@ public:
 	bool isBackButtonClicked() const;
 
 	void setTile(int x, int y, GameTileType tileType);
-	void moveTile(int fromX, int fromY, int toX, int toY);
+	void moveTile(int fromX, int fromY, int toX, int toY, GameTileType tileType);
 	UserMovement getUserMovement();
 };
 

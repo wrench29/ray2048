@@ -4,6 +4,12 @@
 
 Game2048::Game2048() : currentScreenType(GameScreenType::MainMenu) {
 	window.setCurrentScreen(&mainMenuScreen);
+	if (!gameField.isGameInitialized()) {
+		auto spawnedTiles = gameField.spawnNewTiles();
+		for (auto& spawnedTile : spawnedTiles) {
+			gameScreen.setTile(spawnedTile.x, spawnedTile.y, spawnedTile.tileType);
+		}
+	}
 }
 
 void Game2048::run() {
@@ -52,5 +58,18 @@ void Game2048::processGame() {
 	if (gameScreen.isBackButtonClicked()) {
 		currentScreenType = GameScreenType::MainMenu;
 		window.setCurrentScreen(&mainMenuScreen);
+	}
+	UserMovement userMove = gameScreen.getUserMovement();
+	if (userMove != UserMovement::None) {
+		auto fieldChanges = gameField.requestMovement(userMove);
+		if (fieldChanges.size() > 0) {
+			for (auto& tileMove : fieldChanges) {
+				gameScreen.moveTile(tileMove.fromX, tileMove.fromY, tileMove.toX, tileMove.toY, tileMove.tileType);
+			}
+			auto spawnedTiles = gameField.spawnNewTiles();
+			for (auto& spawnedTile : spawnedTiles) {
+				gameScreen.setTile(spawnedTile.x, spawnedTile.y, spawnedTile.tileType);
+			}
+		}
 	}
 }

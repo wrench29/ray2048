@@ -20,6 +20,8 @@ private:
 	SettingsGUI settingsScreen;
 	GameGUI gameScreen;
 
+	GameField gameField;
+
 	void processMainMenu();
 	void processSettings();
 	void processGame();

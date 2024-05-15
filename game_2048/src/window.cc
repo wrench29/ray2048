@@ -25,7 +25,7 @@ Vector2 getTextSize(std::string text) {
 }
 
 void drawText(std::string text, Vector2 position) {
-    DrawText(text.c_str(), position.x, position.y, kFontSize, BLACK);
+    DrawText(text.c_str(), (int)position.x, (int)position.y, kFontSize, BLACK);
 }
 
 void drawButton(std::string text, Vector2 size, Vector2 position, Color color) {
@@ -40,8 +40,8 @@ void drawButton(std::string text, Vector2 size, Vector2 position, Color color) {
         .width = size.x,
         .height = size.y,
     };
-    DrawRectangleRounded(rectangle, 0.3, 5, color);
-    DrawText(text.c_str(), textPosition.x, textPosition.y, kFontSize, WHITE);
+    DrawRectangleRounded(rectangle, 0.3f, 5, color);
+    DrawText(text.c_str(), (int)textPosition.x, (int)textPosition.y, kFontSize, WHITE);
 }
 
 bool isButtonHovered(Vector2 position, Vector2 size) {
@@ -205,8 +205,8 @@ void GameGUI::draw() {
         .width = kFieldSize, 
         .height = kFieldSize,
     };
-    DrawRectangleRounded(mainFieldBackground, 0.05, 20, COLOR(160, 160, 160));
-    std::vector<TileWithPosition> tilesToDraw = getCurrentTiles();
+    DrawRectangleRounded(mainFieldBackground, 0.05f, 20, COLOR(160, 160, 160));
+    std::vector<TileWithAbsolutePosition> tilesToDraw = getCurrentTiles();
     for (auto& tile : tilesToDraw) {
         Rectangle tileRectangle{
             .x = tile.x,
@@ -215,7 +215,7 @@ void GameGUI::draw() {
             .height = kTileSize,
         };
         Color tileColor = getTileColor(tile.tileType);
-        DrawRectangleRounded(tileRectangle, 0.3, 5, tileColor);
+        DrawRectangleRounded(tileRectangle, 0.3f, 5, tileColor);
         std::string tileText = getTileText(tile.tileType);
         if (tileText.size() != 0) {
             Vector2 textSize = MeasureTextEx(GetFontDefault(), tileText.c_str(), kFontSize + 8, 3);
@@ -223,7 +223,7 @@ void GameGUI::draw() {
                 .x = (kTileSize - textSize.x) / 2 + tileRectangle.x,
                 .y = (kTileSize - textSize.y) / 2 + tileRectangle.y,
             };
-            DrawText(tileText.c_str(), textPosition.x, textPosition.y, kFontSize + 8, WHITE);
+            DrawText(tileText.c_str(), (int)textPosition.x, (int)textPosition.y, kFontSize + 8, WHITE);
         }
     }
 }
@@ -238,12 +238,12 @@ void GameGUI::process() {
         isCursorPointing = false;
     }
     isBackButtonHovered = isButtonHovered(backButtonPosition, backButtonSize);
-
-    // Here we need to update animated positions
-    for (int i = (animations.size() - 1); i >= 0; i--) {
+    for (int i = ((int)animations.size() - 1); i >= 0; i--) {
         auto& tileAnimation = animations[i];
         if (tileAnimation.currentStep == (kTileAnimationSteps - 1)) {
-            tiles[tileAnimation.toY][tileAnimation.toX] = tileAnimation.tileType;
+            if (tileAnimation.tileType != GameTileType::NoTile) {
+                tiles[tileAnimation.toY][tileAnimation.toX] = tileAnimation.tileType;
+            }
             animations.erase(std::next(animations.begin(), i));
             continue;
         }
@@ -262,7 +262,7 @@ void GameGUI::setTile(int x, int y, GameTileType tileType) {
     tiles[y][x] = tileType;
 }
 
-void GameGUI::moveTile(int fromX, int fromY, int toX, int toY) {
+void GameGUI::moveTile(int fromX, int fromY, int toX, int toY, GameTileType tileType) {
     if (fromX < 0 || fromX > 3 || toX < 0 || toX > 3 ||
         fromY < 0 || fromY > 3 || toY < 0 || toY > 3) {
         return;
@@ -276,7 +276,7 @@ void GameGUI::moveTile(int fromX, int fromY, int toX, int toY) {
         .toX = toX,
         .toY = toY,
         .currentStep = 0,
-        .tileType = tiles[fromY][fromX],
+        .tileType = tileType,
     });
     tiles[toY][toX] = GameTileType::NoTile;
     tiles[fromY][fromX] = GameTileType::NoTile;
@@ -372,12 +372,12 @@ Vector2 GameGUI::calculateTilePosition(int x, int y) {
     };
 }
 
-std::vector<TileWithPosition> GameGUI::getCurrentTiles() {
-    std::vector<TileWithPosition> tilesToDraw;
+std::vector<TileWithAbsolutePosition> GameGUI::getCurrentTiles() {
+    std::vector<TileWithAbsolutePosition> tilesToDraw;
     for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
             Vector2 tilePosition = calculateTilePosition(x, y);
-            tilesToDraw.push_back(TileWithPosition{
+            tilesToDraw.push_back(TileWithAbsolutePosition{
                 .x = tilePosition.x,
                 .y = tilePosition.y,
                 .tileType = tiles[y][x],
@@ -399,7 +399,7 @@ std::vector<TileWithPosition> GameGUI::getCurrentTiles() {
         if (distanceY >= 1 || distanceY >= -1) {
             tileCurrentPosition.y += ((distanceY / kTileAnimationSteps) * tileAnimation.currentStep);
         }
-        tilesToDraw.push_back(TileWithPosition{
+        tilesToDraw.push_back(TileWithAbsolutePosition{
             .x = tileCurrentPosition.x,
             .y = tileCurrentPosition.y,
             .tileType = tileAnimation.tileType,
