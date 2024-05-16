@@ -10,7 +10,15 @@ struct TileMovement {
 	int fromY;
 	int toX;
 	int toY;
-	GameTileType tileType;
+	GameTileType oldTile;
+	GameTileType newTile;
+};
+
+struct TileLineMovement {
+	int from;
+	int to;
+	GameTileType oldTile;
+	GameTileType newTile;
 };
 
 struct TileWithPosition {
@@ -19,10 +27,19 @@ struct TileWithPosition {
 	GameTileType tileType;
 };
 
+struct FieldLine {
+	GameTileType line[4];
+};
+
 class GameField {
 private:
 	GameTileType tiles[4][4];
 	bool isInitialized;
+
+	std::vector<TileLineMovement> moveLine(FieldLine line, bool reversed);
+
+	std::vector<TileMovement> verticalMove(bool reversed);
+	std::vector<TileMovement> horizontalMove(bool reversed);
 
 public:
 	GameField();

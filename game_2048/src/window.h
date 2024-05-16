@@ -13,7 +13,7 @@ const unsigned int kWindowHeight = 720;
 
 const int kFramerate = 144;
 
-const int kTileAnimationSteps = 50;
+const int kTileAnimationSteps = 30;
 
 enum class GameTileType {
 	NoTile = 0,
@@ -46,7 +46,8 @@ struct TileMovementAnimation {
 	int toX;
 	int toY;
 	int currentStep;
-	GameTileType tileType;
+	GameTileType oldTile;
+	GameTileType newTile;
 };
 
 struct TileWithAbsolutePosition {
@@ -157,7 +158,7 @@ public:
 	bool isBackButtonClicked() const;
 
 	void setTile(int x, int y, GameTileType tileType);
-	void moveTile(int fromX, int fromY, int toX, int toY, GameTileType tileType);
+	void moveTile(int fromX, int fromY, int toX, int toY, GameTileType oldTile, GameTileType newTile);
 	UserMovement getUserMovement();
 };
 

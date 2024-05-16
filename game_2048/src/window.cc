@@ -241,8 +241,8 @@ void GameGUI::process() {
     for (int i = ((int)animations.size() - 1); i >= 0; i--) {
         auto& tileAnimation = animations[i];
         if (tileAnimation.currentStep == (kTileAnimationSteps - 1)) {
-            if (tileAnimation.tileType != GameTileType::NoTile) {
-                tiles[tileAnimation.toY][tileAnimation.toX] = tileAnimation.tileType;
+            if (tileAnimation.newTile != GameTileType::NoTile) {
+                tiles[tileAnimation.toY][tileAnimation.toX] = tileAnimation.newTile;
             }
             animations.erase(std::next(animations.begin(), i));
             continue;
@@ -262,7 +262,7 @@ void GameGUI::setTile(int x, int y, GameTileType tileType) {
     tiles[y][x] = tileType;
 }
 
-void GameGUI::moveTile(int fromX, int fromY, int toX, int toY, GameTileType tileType) {
+void GameGUI::moveTile(int fromX, int fromY, int toX, int toY, GameTileType oldTile, GameTileType newTile) {
     if (fromX < 0 || fromX > 3 || toX < 0 || toX > 3 ||
         fromY < 0 || fromY > 3 || toY < 0 || toY > 3) {
         return;
@@ -276,9 +276,9 @@ void GameGUI::moveTile(int fromX, int fromY, int toX, int toY, GameTileType tile
         .toX = toX,
         .toY = toY,
         .currentStep = 0,
-        .tileType = tileType,
+        .oldTile = oldTile,
+        .newTile = newTile,
     });
-    tiles[toY][toX] = GameTileType::NoTile;
     tiles[fromY][fromX] = GameTileType::NoTile;
 }
 
@@ -393,16 +393,16 @@ std::vector<TileWithAbsolutePosition> GameGUI::getCurrentTiles() {
             .x = tileOldPosition.x,
             .y = tileOldPosition.y,
         };
-        if (distanceX >= 1 || distanceX >= -1) {
+        if (distanceX >= 1 || distanceX <= -1) {
             tileCurrentPosition.x += ((distanceX / kTileAnimationSteps) * tileAnimation.currentStep);
         }
-        if (distanceY >= 1 || distanceY >= -1) {
+        if (distanceY >= 1 || distanceY <= -1) {
             tileCurrentPosition.y += ((distanceY / kTileAnimationSteps) * tileAnimation.currentStep);
         }
         tilesToDraw.push_back(TileWithAbsolutePosition{
             .x = tileCurrentPosition.x,
             .y = tileCurrentPosition.y,
-            .tileType = tileAnimation.tileType,
+            .tileType = tileAnimation.oldTile,
         });
     }
     return tilesToDraw;

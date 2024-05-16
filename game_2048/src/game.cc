@@ -64,7 +64,7 @@ void Game2048::processGame() {
 		auto fieldChanges = gameField.requestMovement(userMove);
 		if (fieldChanges.size() > 0) {
 			for (auto& tileMove : fieldChanges) {
-				gameScreen.moveTile(tileMove.fromX, tileMove.fromY, tileMove.toX, tileMove.toY, tileMove.tileType);
+				gameScreen.moveTile(tileMove.fromX, tileMove.fromY, tileMove.toX, tileMove.toY, tileMove.oldTile, tileMove.newTile);
 			}
 			auto spawnedTiles = gameField.spawnNewTiles();
 			for (auto& spawnedTile : spawnedTiles) {
