@@ -13,7 +13,7 @@ const unsigned int kWindowHeight = 720;
 
 const int kFramerate = 144;
 
-const int kTileAnimationSteps = 30;
+const int kTileAnimationSteps = 20;
 
 enum class GameTileType {
 	NoTile = 0,

@@ -2,6 +2,7 @@
 #define GAME_2048_LOGIC_H
 
 #include <vector>
+#include <random>
 
 #include "window.h"
 
@@ -35,6 +36,12 @@ class GameField {
 private:
 	GameTileType tiles[4][4];
 	bool isInitialized;
+
+	std::mt19937 randomGenerator;
+
+	int randomNumber(int min, int max);
+
+	std::vector<TileWithPosition> getEmptyTiles();
 
 	std::vector<TileLineMovement> moveLine(FieldLine line, bool reversed);
 

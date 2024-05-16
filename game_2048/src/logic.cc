@@ -1,39 +1,63 @@
 #include "logic.h"
 
 GameField::GameField() : tiles{}, isInitialized(false) {
-	
+	std::random_device dev;
+	randomGenerator = std::mt19937(dev());
+}
+
+// Generate number in range [min; max]
+int GameField::randomNumber(int min, int max) {
+	std::uniform_int_distribution<std::mt19937::result_type> distribution(min, max);
+	return distribution(randomGenerator);
 }
 
 std::vector<TileWithPosition> GameField::spawnNewTiles() {
 	std::vector<TileWithPosition> newTiles;
 	if (!isInitialized) {
 		isInitialized = true;
-		tiles[0][0] = GameTileType::Tile4;
-		tiles[1][1] = GameTileType::Tile4;
-		tiles[2][2] = GameTileType::Tile2;
-		tiles[3][3] = GameTileType::Tile4;
+	}
+	auto emptyTiles = getEmptyTiles();
+	if (emptyTiles.size() == 0) {
+		return newTiles;
+	}
+	int countOfTilesToSpawn = randomNumber(1, 2); // generate by random
+	for (int i = 0; i < countOfTilesToSpawn; i++) {
+		bool is4Tile = randomNumber(1, 10) > 7; // generate by random with 20% chance
+		GameTileType tileToSpawn = is4Tile ? GameTileType::Tile4 : GameTileType::Tile2;
+		bool isReallyEmpty = false;
+		int randomIndex = 0;
+		while (!isReallyEmpty) {
+			randomIndex = randomNumber(0, emptyTiles.size() - 1);
+			if (tiles[emptyTiles[randomIndex].y][emptyTiles[randomIndex].x] == GameTileType::NoTile) {
+				isReallyEmpty = true;
+			}
+		}
+		int emptyX = emptyTiles[randomIndex].x;
+		int emptyY = emptyTiles[randomIndex].y;
+		tiles[emptyY][emptyX] = tileToSpawn;
 		newTiles.push_back(TileWithPosition{
-			.x = 0,
-			.y = 0,
-			.tileType = GameTileType::Tile4,
+			.x = emptyX,
+			.y = emptyY,
+			.tileType = tileToSpawn,
 		});
-		newTiles.push_back(TileWithPosition{
-			.x = 1,
-			.y = 1,
-			.tileType = GameTileType::Tile4,
-		});
-		newTiles.push_back(TileWithPosition{
-			.x = 2,
-			.y = 2,
-			.tileType = GameTileType::Tile2,
-			});
-		newTiles.push_back(TileWithPosition{
-			.x = 3,
-			.y = 3,
-			.tileType = GameTileType::Tile4,
-			});
 	}
 	return newTiles;
+}
+
+std::vector<TileWithPosition> GameField::getEmptyTiles() {
+	std::vector<TileWithPosition> emptyTiles;
+	for (int y = 0; y < 4; y++) {
+		for (int x = 0; x < 4; x++) {
+			if (tiles[y][x] == GameTileType::NoTile) {
+				emptyTiles.push_back(TileWithPosition{
+					.x = x,
+					.y = y,
+					.tileType = GameTileType::NoTile,
+				});
+			}
+		}
+	}
+	return emptyTiles;
 }
 
 std::vector<TileMovement> GameField::requestMovement(UserMovement movement) {
