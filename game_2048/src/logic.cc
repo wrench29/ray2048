@@ -80,13 +80,18 @@ std::vector<TileMovement> GameField::requestMovement(UserMovement movement) {
 // Move tiles in right direction, IF reversed == true, move in left direction
 std::vector<TileLineMovement> GameField::moveLine(FieldLine line, bool reversed) {
 	std::vector<TileLineMovement> movedTiles;
-	for (int targetTile = 3; targetTile > 0; targetTile--) {
+	int targetTile = reversed ? 0 : 3;
+	int targetLimit = reversed ? 3 : 0;
+	while (targetTile != targetLimit) {
 		bool isTargetEmpty = false;
 		if (line.line[targetTile] == GameTileType::NoTile) {
 			isTargetEmpty = true;
 		}
-		for (int i = (targetTile - 1); i >= 0; i--) {
+		int i = reversed ? (targetTile + 1) : (targetTile - 1);
+		int limit = reversed ? 4 : -1;
+		while (i != limit) {
 			if (line.line[i] == GameTileType::NoTile) {
+				i += reversed ? 1 : -1;
 				continue;
 			}
 			if (line.line[i] == line.line[targetTile]) {
@@ -97,7 +102,7 @@ std::vector<TileLineMovement> GameField::moveLine(FieldLine line, bool reversed)
 					.to = targetTile,
 					.oldTile = line.line[targetTile],
 					.newTile = newTile,
-				});
+					});
 				line.line[i] = GameTileType::NoTile;
 				break;
 			}
@@ -114,7 +119,9 @@ std::vector<TileLineMovement> GameField::moveLine(FieldLine line, bool reversed)
 			if (line.line[i] != line.line[targetTile]) {
 				break;
 			}
+			i += reversed ? 1 : -1;
 		}
+		targetTile += reversed ? 1 : -1;
 	}
 	return movedTiles;
 }
