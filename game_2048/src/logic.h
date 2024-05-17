@@ -39,8 +39,8 @@ private:
 
 	std::vector<TileLineMovement> moveLine(FieldLine& line, bool reversed);
 
-	std::vector<TileMovement> verticalMove(bool reversed);
-	std::vector<TileMovement> horizontalMove(bool reversed);
+	std::vector<TileMovement> verticalMove(bool reversed, bool modifyField);
+	std::vector<TileMovement> horizontalMove(bool reversed, bool modifyField);
 
 public:
 	GameField();

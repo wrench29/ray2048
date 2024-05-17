@@ -27,10 +27,15 @@ std::vector<TileWithPosition> GameField::spawnNewTiles() {
 		bool isReallyEmpty = false;
 		int randomIndex = 0;
 		while (!isReallyEmpty) {
+			if (emptyTiles.size() == 0) {
+				return newTiles;
+			}
 			randomIndex = randomNumber(0, emptyTiles.size() - 1);
 			if (tiles[emptyTiles[randomIndex].y][emptyTiles[randomIndex].x] == GameTileType::NoTile) {
 				isReallyEmpty = true;
+				break;
 			}
+			emptyTiles.erase(std::next(emptyTiles.begin(), randomIndex));
 		}
 		int emptyX = emptyTiles[randomIndex].x;
 		int emptyY = emptyTiles[randomIndex].y;
@@ -64,19 +69,19 @@ std::vector<TileMovement> GameField::requestMovement(UserMovement movement) {
 	std::vector<TileMovement> movedTiles;
 	switch (movement) {
 	case UserMovement::Left: {
-		movedTiles = horizontalMove(false);
+		movedTiles = horizontalMove(false, true);
 		break;
 	}
 	case UserMovement::Right: {
-		movedTiles = horizontalMove(true);
+		movedTiles = horizontalMove(true, true);
 		break;
 	}
 	case UserMovement::Up: {
-		movedTiles = verticalMove(false);
+		movedTiles = verticalMove(false, true);
 		break;
 	}
 	case UserMovement::Down: {
-		movedTiles = verticalMove(true);
+		movedTiles = verticalMove(true, true);
 		break;
 	}
 	}
@@ -98,6 +103,7 @@ std::vector<TileMovement> GameField::requestMovement(UserMovement movement) {
 // Move tiles in left direction, IF reversed == true, move in right direction
 std::vector<TileLineMovement> GameField::moveLine(FieldLine& line, bool reversed) {
 	std::vector<TileLineMovement> movedTiles;
+	bool wasTileMerged[4]{false};
 	int i = reversed ? 3 : 0;
 	int stopI = reversed ? 0 : 3;
 	bool endExprI = reversed ? i < stopI : i > stopI;
@@ -131,7 +137,7 @@ std::vector<TileLineMovement> GameField::moveLine(FieldLine& line, bool reversed
 			if (line.line[j] == GameTileType::NoTile) {
 				lastAvailableSpot = j;
 			}
-			else if (line.line[j] == line.line[i]) {
+			else if (line.line[j] == line.line[i] && !wasTileMerged[j]) {
 				lastAvailableSpot = i;
 				break;
 			}
@@ -170,6 +176,7 @@ std::vector<TileLineMovement> GameField::moveLine(FieldLine& line, bool reversed
 			tileMovement.newTile = mergedTileMovement.newTile;
 			line.line[lastAvailableSpot] = mergedTileMovement.newTile;
 			line.line[tileToMerge] = GameTileType::NoTile;
+			wasTileMerged[lastAvailableSpot] = true;
 		}
 		// if movements were made - add them to the vector
 		if (tileMovement.to != -1) {
@@ -184,7 +191,7 @@ std::vector<TileLineMovement> GameField::moveLine(FieldLine& line, bool reversed
 	return movedTiles;
 }
 
-std::vector<TileMovement> GameField::horizontalMove(bool reversed) {
+std::vector<TileMovement> GameField::horizontalMove(bool reversed, bool modifyField) {
 	std::vector<TileMovement> movedTiles;
 	for (int y = 0; y < 4; y++) {
 		FieldLine line{
@@ -207,15 +214,17 @@ std::vector<TileMovement> GameField::horizontalMove(bool reversed) {
 				.newTile = lineMove.newTile,
 			});
 		}
-		tiles[y][0] = line.line[0];
-		tiles[y][1] = line.line[1];
-		tiles[y][2] = line.line[2];
-		tiles[y][3] = line.line[3];
+		if (modifyField) {
+			tiles[y][0] = line.line[0];
+			tiles[y][1] = line.line[1];
+			tiles[y][2] = line.line[2];
+			tiles[y][3] = line.line[3];
+		}
 	}
 	return movedTiles;
 }
 
-std::vector<TileMovement> GameField::verticalMove(bool reversed) {
+std::vector<TileMovement> GameField::verticalMove(bool reversed, bool modifyField) {
 	std::vector<TileMovement> movedTiles;
 	for (int x = 0; x < 4; x++) {
 		FieldLine line{
@@ -238,19 +247,20 @@ std::vector<TileMovement> GameField::verticalMove(bool reversed) {
 				.newTile = lineMove.newTile,
 			});
 		}
-		tiles[0][x] = line.line[0];
-		tiles[1][x] = line.line[1];
-		tiles[2][x] = line.line[2];
-		tiles[3][x] = line.line[3];
+		if (modifyField) {
+			tiles[0][x] = line.line[0];
+			tiles[1][x] = line.line[1];
+			tiles[2][x] = line.line[2];
+			tiles[3][x] = line.line[3];
+		}
 	}
 	return movedTiles;
 }
 
 bool GameField::isGameFailed() {
-	// REMOVE
-	bool leftMoveAvailable = horizontalMove(false).size() > 0;
-	bool rightMoveAvailable = horizontalMove(true).size() > 0;
-	bool upMoveAvailable = verticalMove(false).size() > 0;
-	bool downMoveAvailable = verticalMove(true).size() > 0;
+	bool leftMoveAvailable = horizontalMove(true, false).size() > 0;
+	bool rightMoveAvailable = horizontalMove(false, false).size() > 0;
+	bool upMoveAvailable = verticalMove(true, false).size() > 0;
+	bool downMoveAvailable = verticalMove(false, false).size() > 0;
 	return leftMoveAvailable || rightMoveAvailable || upMoveAvailable || downMoveAvailable;
 }
