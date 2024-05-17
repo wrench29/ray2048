@@ -22,12 +22,6 @@ struct TileLineMovement {
 	GameTileType newTile;
 };
 
-struct TileWithPosition {
-	int x;
-	int y;
-	GameTileType tileType;
-};
-
 struct FieldLine {
 	GameTileType line[4];
 };
@@ -43,7 +37,7 @@ private:
 
 	std::vector<TileWithPosition> getEmptyTiles();
 
-	std::vector<TileLineMovement> moveLine(FieldLine line, bool reversed);
+	std::vector<TileLineMovement> moveLine(FieldLine& line, bool reversed);
 
 	std::vector<TileMovement> verticalMove(bool reversed);
 	std::vector<TileMovement> horizontalMove(bool reversed);

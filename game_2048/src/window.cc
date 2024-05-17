@@ -249,6 +249,12 @@ void GameGUI::process() {
         }
         tileAnimation.currentStep++;
     }
+    if (animations.size() == 0) {
+        for (auto& pendingTile : pendingTiles) {
+            tiles[pendingTile.y][pendingTile.x] = pendingTile.tileType;
+        }
+        pendingTiles.clear();
+    }
 }
 
 bool GameGUI::isBackButtonClicked() const {
@@ -259,7 +265,11 @@ void GameGUI::setTile(int x, int y, GameTileType tileType) {
     if (x < 0 || x > 3 || y < 0 || y > 3) {
         return;
     }
-    tiles[y][x] = tileType;
+    pendingTiles.push_back(TileWithPosition{
+        .x = x,
+        .y = y,
+        .tileType = tileType
+    });
 }
 
 void GameGUI::moveTile(int fromX, int fromY, int toX, int toY, GameTileType oldTile, GameTileType newTile) {

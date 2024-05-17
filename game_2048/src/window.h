@@ -56,6 +56,12 @@ struct TileWithAbsolutePosition {
 	GameTileType tileType;
 };
 
+struct TileWithPosition {
+	int x;
+	int y;
+	GameTileType tileType;
+};
+
 class IGUIScreen {
 public:	
 	virtual void draw() = 0;
@@ -143,6 +149,7 @@ private:
 
 	GameTileType tiles[4][4]; // usage: tiles[0][2] where 0 - Y, 2 - X. 
 	std::vector<TileMovementAnimation> animations;
+	std::vector<TileWithPosition> pendingTiles;
 
 	Vector2 calculateTilePosition(int x, int y);
 	Color getTileColor(GameTileType tileType);

@@ -64,27 +64,21 @@ std::vector<TileMovement> GameField::requestMovement(UserMovement movement) {
 	std::vector<TileMovement> movedTiles;
 	switch (movement) {
 	case UserMovement::Left: {
-		movedTiles = horizontalMove(true);
-		break;
-	}
-	case UserMovement::Right: {
 		movedTiles = horizontalMove(false);
 		break;
 	}
-	case UserMovement::Up: {
-		movedTiles = verticalMove(true);
+	case UserMovement::Right: {
+		movedTiles = horizontalMove(true);
 		break;
 	}
-	case UserMovement::Down: {
+	case UserMovement::Up: {
 		movedTiles = verticalMove(false);
 		break;
 	}
+	case UserMovement::Down: {
+		movedTiles = verticalMove(true);
+		break;
 	}
-	if (movedTiles.size() > 0) {
-		for (auto& tile : movedTiles) {
-			tiles[tile.fromY][tile.fromX] = GameTileType::NoTile;
-			tiles[tile.toY][tile.toX] = tile.newTile;
-		}
 	}
 	return movedTiles;
 }
@@ -101,51 +95,91 @@ std::vector<TileMovement> GameField::requestMovement(UserMovement movement) {
 	 - Tile merge can occur ONLY with tiles, that were moved by user (for example -> 2 | 2 | 2 | 2 => X | X | 4 | 4 );
 */
 
-// Move tiles in right direction, IF reversed == true, move in left direction
-std::vector<TileLineMovement> GameField::moveLine(FieldLine line, bool reversed) {
+// Move tiles in left direction, IF reversed == true, move in right direction
+std::vector<TileLineMovement> GameField::moveLine(FieldLine& line, bool reversed) {
 	std::vector<TileLineMovement> movedTiles;
-	int targetTile = reversed ? 0 : 3;
-	int targetLimit = reversed ? 3 : 0;
-	while (targetTile != targetLimit) {
-		bool isTargetEmpty = false;
-		if (line.line[targetTile] == GameTileType::NoTile) {
-			isTargetEmpty = true;
+	int i = reversed ? 3 : 0;
+	int stopI = reversed ? 0 : 3;
+	bool endExprI = reversed ? i < stopI : i > stopI;
+	while (!endExprI) {
+		// skip empty tiles
+		if (line.line[i] == GameTileType::NoTile) {
+			i += reversed ? -1 : 1;
+			endExprI = reversed ? i < stopI : i > stopI;
+			continue;
 		}
-		int i = reversed ? (targetTile + 1) : (targetTile - 1);
-		int limit = reversed ? 4 : -1;
-		while (i != limit) {
-			if (line.line[i] == GameTileType::NoTile) {
-				i += reversed ? 1 : -1;
-				continue;
+		// prepare movements
+		GameTileType upgradeTile = (GameTileType)((int)line.line[i] + 1);
+		TileLineMovement tileMovement{
+			.from = i,
+			.to = -1,
+			.oldTile = line.line[i],
+			.newTile = line.line[i],
+		};
+		TileLineMovement mergedTileMovement{
+			.from = -1,
+			.to = -1,
+			.oldTile = line.line[i],
+			.newTile = upgradeTile,
+		};
+		// check if there is available movement for tile 'i'
+		int lastAvailableSpot = i;
+		int j = reversed ? (i + 1) : (i - 1);
+		int stopJ = reversed ? 3 : 0;
+		bool endExpr = reversed ? j > stopJ : j < stopJ;
+		while (!endExpr) {
+			if (line.line[j] == GameTileType::NoTile) {
+				lastAvailableSpot = j;
 			}
-			if (line.line[i] == line.line[targetTile]) {
-				// Merge tiles
-				GameTileType newTile = (GameTileType)((int)line.line[targetTile] + 1);
-				movedTiles.push_back(TileLineMovement{
-					.from = i,
-					.to = targetTile,
-					.oldTile = line.line[targetTile],
-					.newTile = newTile,
-					});
-				line.line[i] = GameTileType::NoTile;
+			else if (line.line[j] == line.line[i]) {
+				lastAvailableSpot = i;
 				break;
 			}
-			if (isTargetEmpty) {
-				movedTiles.push_back(TileLineMovement{
-					.from = i,
-					.to = targetTile,
-					.oldTile = line.line[i],
-					.newTile = line.line[i],
-					});
-				line.line[i] = GameTileType::NoTile;
+			else {
 				break;
 			}
-			if (line.line[i] != line.line[targetTile]) {
-				break;
-			}
-			i += reversed ? 1 : -1;
+			j += reversed ? 1 : -1;
+			endExpr = reversed ? j > stopJ : j < stopJ;
 		}
-		targetTile += reversed ? 1 : -1;
+		// if there is available movement - make it
+		if (lastAvailableSpot != i) {
+			tileMovement.to = lastAvailableSpot;
+			line.line[lastAvailableSpot] = line.line[i];
+			line.line[i] = GameTileType::NoTile;
+		}
+		// check if there is available merge for tile 'lastAvailableMovement'
+		int tileToMerge = -1;
+		j = reversed ? (lastAvailableSpot - 1) : (lastAvailableSpot + 1);
+		stopJ = reversed ? 0 : 3;
+		endExpr = reversed ? j < stopJ : j > stopJ;
+		while (!endExpr) {
+			if (line.line[j] == tileMovement.oldTile) {
+				tileToMerge = j;
+				break;
+			}
+			if (line.line[j] != GameTileType::NoTile && line.line[j] != tileMovement.oldTile) {
+				break;
+			}
+			j += reversed ? -1 : 1;
+			endExpr = reversed ? j < stopJ : j > stopJ;
+		}
+		// if merge is available - make it
+		if (tileToMerge != -1) {
+			mergedTileMovement.from = tileToMerge;
+			mergedTileMovement.to = lastAvailableSpot;
+			tileMovement.newTile = mergedTileMovement.newTile;
+			line.line[lastAvailableSpot] = mergedTileMovement.newTile;
+			line.line[tileToMerge] = GameTileType::NoTile;
+		}
+		// if movements were made - add them to the vector
+		if (tileMovement.to != -1) {
+			movedTiles.push_back(tileMovement);
+		}
+		if (mergedTileMovement.to != -1) {
+			movedTiles.push_back(mergedTileMovement);
+		}
+		i += reversed ? -1 : 1;
+		endExprI = reversed ? i < stopI : i > stopI;
 	}
 	return movedTiles;
 }
@@ -173,6 +207,10 @@ std::vector<TileMovement> GameField::horizontalMove(bool reversed) {
 				.newTile = lineMove.newTile,
 			});
 		}
+		tiles[y][0] = line.line[0];
+		tiles[y][1] = line.line[1];
+		tiles[y][2] = line.line[2];
+		tiles[y][3] = line.line[3];
 	}
 	return movedTiles;
 }
@@ -200,11 +238,16 @@ std::vector<TileMovement> GameField::verticalMove(bool reversed) {
 				.newTile = lineMove.newTile,
 			});
 		}
+		tiles[0][x] = line.line[0];
+		tiles[1][x] = line.line[1];
+		tiles[2][x] = line.line[2];
+		tiles[3][x] = line.line[3];
 	}
 	return movedTiles;
 }
 
 bool GameField::isGameFailed() {
+	// REMOVE
 	bool leftMoveAvailable = horizontalMove(false).size() > 0;
 	bool rightMoveAvailable = horizontalMove(true).size() > 0;
 	bool upMoveAvailable = verticalMove(false).size() > 0;
