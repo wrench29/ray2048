@@ -49,6 +49,7 @@ public:
 	std::vector<TileMovement> requestMovement(UserMovement movement);
 	bool isGameFailed();
 	bool isGameInitialized() const { return isInitialized; }
+    void reset();
 };
 
 #endif // GAME_2048_LOGIC_H

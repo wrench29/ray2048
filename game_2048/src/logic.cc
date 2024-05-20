@@ -11,6 +11,15 @@ int GameField::randomNumber(int min, int max) {
 	return distribution(randomGenerator);
 }
 
+void GameField::reset() {
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            tiles[y][x] = GameTileType::NoTile;
+        }
+    }
+    isInitialized = false;
+}
+
 std::vector<TileWithPosition> GameField::spawnNewTiles() {
 	std::vector<TileWithPosition> newTiles;
 	if (!isInitialized) {
@@ -262,5 +271,7 @@ bool GameField::isGameFailed() {
 	bool rightMoveAvailable = horizontalMove(false, false).size() > 0;
 	bool upMoveAvailable = verticalMove(true, false).size() > 0;
 	bool downMoveAvailable = verticalMove(false, false).size() > 0;
-	return leftMoveAvailable || rightMoveAvailable || upMoveAvailable || downMoveAvailable;
+	return !leftMoveAvailable && !rightMoveAvailable && 
+           !upMoveAvailable && !downMoveAvailable;
 }
+

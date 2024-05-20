@@ -9,7 +9,7 @@
 const int kFontSize = 40;
 
 const unsigned int kWindowWidth = 1280;
-const unsigned int kWindowHeight = 720;
+const unsigned int kWindowHeight = 900;
 
 const int kFramerate = 144;
 
@@ -137,15 +137,25 @@ private:
 	const float kFieldSize = (kTileSize * 4) + (kGapSize * 5);
 
 	const std::string backButtonText = "<- Back";
+    const std::string resetButtonText = "RESET";
+    const std::string gameFailedText = 
+        "You lose :( Press \"RESET\" to try again.";
 
 	Vector2 backButtonPosition;
 	Vector2 backButtonSize;
 
+    Vector2 resetButtonPosition;
+    Vector2 resetButtonSize;
+
 	bool isBackButtonHovered;
+    bool isResetButtonHovered;
 
 	Color hoveredButtonColor;
 
 	bool isCursorPointing;
+
+    bool isGameFailed;
+    bool isResetAsked;
 
 	GameTileType tiles[4][4]; // usage: tiles[0][2] where 0 - Y, 2 - X. 
 	std::vector<TileMovementAnimation> animations;
@@ -165,8 +175,12 @@ public:
 	bool isBackButtonClicked() const;
 
 	void setTile(int x, int y, GameTileType tileType);
-	void moveTile(int fromX, int fromY, int toX, int toY, GameTileType oldTile, GameTileType newTile);
-	UserMovement getUserMovement();
+	void moveTile(int fromX, int fromY, int toX, int toY, 
+                  GameTileType oldTile, GameTileType newTile);
+    bool getIsResetAsked();
+    void setGameFailed();
+	void reset();
+    UserMovement getUserMovement();
 };
 
 class GameWindow {

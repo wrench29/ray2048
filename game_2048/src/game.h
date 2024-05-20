@@ -26,6 +26,8 @@ private:
 	void processSettings();
 	void processGame();
 
+    void initializeField();
+
 public:
 	Game2048();
 

@@ -187,18 +187,52 @@ bool SettingsGUI::isBackButtonClicked() const {
     return isButtonClicked(backButtonPosition, backButtonSize);
 }
 
-GameGUI::GameGUI() : isBackButtonHovered(true), isCursorPointing(false), tiles{} {
+GameGUI::GameGUI() : isBackButtonHovered(true), isCursorPointing(false), 
+                     tiles{}, isGameFailed(false), isResetAsked(false) {
     backButtonPosition = { .x = 25, .y = 25 };
     backButtonSize = { .x = 200, .y = 50 };
+    resetButtonSize = { .x = 250, .y = 50 };
+    resetButtonPosition = { 
+        .x = CENTERED_ELEMENT_START(kWindowWidth, resetButtonSize.x), 
+        .y = kWindowHeight - 75
+    };
     hoveredButtonColor = { .r = 230, .g = 100, .b = 100, .a = 255 };
+}
+
+bool GameGUI::getIsResetAsked() {
+    bool temp = isResetAsked;
+    isResetAsked = false;
+    return temp;
+}
+
+void GameGUI::setGameFailed() {
+    isGameFailed = true;
+}
+
+void GameGUI::reset() {
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            tiles[y][x] = GameTileType::NoTile;
+        }
+    }
+    pendingTiles.clear();
+    animations.clear();
+    isGameFailed = false;
 }
 
 void GameGUI::draw() {
     Color backButtonColor = RED;
+    Color resetButtonColor = RED;
     if (isBackButtonHovered) {
         backButtonColor = hoveredButtonColor;
     }
-    drawButton(backButtonText, backButtonSize, backButtonPosition, backButtonColor);
+    if (isResetButtonHovered) {
+        resetButtonColor = hoveredButtonColor;
+    }
+    drawButton(backButtonText, backButtonSize, backButtonPosition, 
+               backButtonColor);
+    drawButton(resetButtonText, resetButtonSize, resetButtonPosition, 
+               resetButtonColor);
     Rectangle mainFieldBackground{
         .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize),
         .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize),
@@ -218,31 +252,53 @@ void GameGUI::draw() {
         DrawRectangleRounded(tileRectangle, 0.3f, 5, tileColor);
         std::string tileText = getTileText(tile.tileType);
         if (tileText.size() != 0) {
-            Vector2 textSize = MeasureTextEx(GetFontDefault(), tileText.c_str(), kFontSize + 8, 3);
+            Vector2 textSize = MeasureTextEx(GetFontDefault(), 
+                                             tileText.c_str(), kFontSize + 8, 
+                                             3);
             Vector2 textPosition{
                 .x = (kTileSize - textSize.x) / 2 + tileRectangle.x,
                 .y = (kTileSize - textSize.y) / 2 + tileRectangle.y,
             };
-            DrawText(tileText.c_str(), (int)textPosition.x, (int)textPosition.y, kFontSize + 8, WHITE);
+            DrawText(tileText.c_str(), (int)textPosition.x, 
+                     (int)textPosition.y, kFontSize + 8, WHITE);
         }
     }
+    if (!isGameFailed) {
+        return;
+    }
+    Vector2 gameFailedTextSize = MeasureTextEx(GetFontDefault(), 
+                                     gameFailedText.c_str(), kFontSize, 
+                                     3);
+    Vector2 gameFailedTextPosition{
+        .x = CENTERED_ELEMENT_START(kWindowWidth, gameFailedTextSize.x),
+        .y = kWindowHeight - 100 - gameFailedTextSize.y,
+    };
+    DrawText(gameFailedText.c_str(), (int)gameFailedTextPosition.x, 
+             (int)gameFailedTextPosition.y, kFontSize, BLACK);
 }
 
 void GameGUI::process() {
-    if (isBackButtonHovered && !isCursorPointing) {
+    if ((isBackButtonHovered || isResetButtonHovered) && !isCursorPointing) {
         SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         isCursorPointing = true;
     }
-    if (!isBackButtonHovered && isCursorPointing) {
+    if (!isBackButtonHovered && !isResetButtonHovered && isCursorPointing) {
         SetMouseCursor(MOUSE_CURSOR_ARROW);
         isCursorPointing = false;
     }
     isBackButtonHovered = isButtonHovered(backButtonPosition, backButtonSize);
+    isResetButtonHovered = isButtonHovered(resetButtonPosition, 
+                                           resetButtonSize);
+    if (!isResetAsked && isButtonClicked(resetButtonPosition, 
+                                         resetButtonSize)) {
+        isResetAsked = true;
+    }
     for (int i = ((int)animations.size() - 1); i >= 0; i--) {
         auto& tileAnimation = animations[i];
         if (tileAnimation.currentStep == (kTileAnimationSteps - 1)) {
             if (tileAnimation.newTile != GameTileType::NoTile) {
-                tiles[tileAnimation.toY][tileAnimation.toX] = tileAnimation.newTile;
+                tiles[tileAnimation.toY][tileAnimation.toX] = 
+                    tileAnimation.newTile;
             }
             animations.erase(std::next(animations.begin(), i));
             continue;
@@ -272,7 +328,8 @@ void GameGUI::setTile(int x, int y, GameTileType tileType) {
     });
 }
 
-void GameGUI::moveTile(int fromX, int fromY, int toX, int toY, GameTileType oldTile, GameTileType newTile) {
+void GameGUI::moveTile(int fromX, int fromY, int toX, int toY, 
+                       GameTileType oldTile, GameTileType newTile) {
     if (fromX < 0 || fromX > 3 || toX < 0 || toX > 3 ||
         fromY < 0 || fromY > 3 || toY < 0 || toY > 3) {
         return;
@@ -377,8 +434,10 @@ std::string GameGUI::getTileText(GameTileType tileType) {
 
 Vector2 GameGUI::calculateTilePosition(int x, int y) {
     return Vector2{
-        .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize) + kGapSize + ((kGapSize + kTileSize) * x),
-        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) + kGapSize + ((kGapSize + kTileSize) * y),
+        .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize) + 
+                                    kGapSize + ((kGapSize + kTileSize) * x),
+        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) + 
+                                    kGapSize + ((kGapSize + kTileSize) * y),
     };
 }
 
@@ -395,8 +454,10 @@ std::vector<TileWithAbsolutePosition> GameGUI::getCurrentTiles() {
         }
     }
     for (auto& tileAnimation : animations) {
-        Vector2 tileOldPosition = calculateTilePosition(tileAnimation.fromX, tileAnimation.fromY);
-        Vector2 tileNewPosition = calculateTilePosition(tileAnimation.toX, tileAnimation.toY);
+        Vector2 tileOldPosition = calculateTilePosition(tileAnimation.fromX, 
+                                                        tileAnimation.fromY);
+        Vector2 tileNewPosition = calculateTilePosition(tileAnimation.toX,
+                                                        tileAnimation.toY);
         float distanceX = tileNewPosition.x - tileOldPosition.x;
         float distanceY = tileNewPosition.y - tileOldPosition.y;
         Vector2 tileCurrentPosition{
@@ -404,10 +465,12 @@ std::vector<TileWithAbsolutePosition> GameGUI::getCurrentTiles() {
             .y = tileOldPosition.y,
         };
         if (distanceX >= 1 || distanceX <= -1) {
-            tileCurrentPosition.x += ((distanceX / kTileAnimationSteps) * tileAnimation.currentStep);
+            tileCurrentPosition.x += ((distanceX / kTileAnimationSteps) * 
+                                      tileAnimation.currentStep);
         }
         if (distanceY >= 1 || distanceY <= -1) {
-            tileCurrentPosition.y += ((distanceY / kTileAnimationSteps) * tileAnimation.currentStep);
+            tileCurrentPosition.y += ((distanceY / kTileAnimationSteps) * 
+                                      tileAnimation.currentStep);
         }
         tilesToDraw.push_back(TileWithAbsolutePosition{
             .x = tileCurrentPosition.x,
