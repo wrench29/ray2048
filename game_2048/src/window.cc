@@ -21,7 +21,7 @@
 
 
 Vector2 getTextSize(std::string text) {
-    return MeasureTextEx(GetFontDefault(), text.c_str(), kFontSize, 1);
+    return MeasureTextEx(GetFontDefault(), text.c_str(), kFontSize, 5);
 }
 
 void drawText(std::string text, Vector2 position) {
@@ -98,10 +98,10 @@ MainMenuGUI::MainMenuGUI() : isPlayButtonHovered(false), isSettingsButtonHovered
     playButtonSize = buttonSize;
     settingsButtonSize = buttonSize;
     exitButtonSize = buttonSize;
-    playButtonPosition = { .x = buttonLeftOffset, .y = 250 };
-    settingsButtonPosition = { .x = buttonLeftOffset, .y = 320 };
-    exitButtonPosition = { .x = buttonLeftOffset, .y = 390 };
-    logoTextPosition = { .x = CENTERED_ELEMENT_START(kWindowWidth, getTextSize(logoText).x), .y = 100 };
+    playButtonPosition = { .x = buttonLeftOffset, .y = 320 };
+    settingsButtonPosition = { .x = buttonLeftOffset, .y = playButtonPosition.y + 70 };
+    exitButtonPosition = { .x = buttonLeftOffset, .y = settingsButtonPosition.y + 70 };
+    logoTextPosition = { .x = CENTERED_ELEMENT_START(kWindowWidth, getTextSize(logoText).x), .y = 150 };
     hoveredButtonColor = { .r = 230, .g = 100, .b = 100, .a = 255 };
 }
 
@@ -188,7 +188,8 @@ bool SettingsGUI::isBackButtonClicked() const {
 }
 
 GameGUI::GameGUI() : isBackButtonHovered(true), isCursorPointing(false), 
-                     tiles{}, isGameFailed(false), isResetAsked(false) {
+                     tiles{}, isGameFailed(false), isResetAsked(false),
+                     isResetButtonHovered(false) {
     backButtonPosition = { .x = 25, .y = 25 };
     backButtonSize = { .x = 200, .y = 50 };
     resetButtonSize = { .x = 250, .y = 50 };
@@ -235,7 +236,7 @@ void GameGUI::draw() {
                resetButtonColor);
     Rectangle mainFieldBackground{
         .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize),
-        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize),
+        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) - 40,
         .width = kFieldSize, 
         .height = kFieldSize,
     };
@@ -436,7 +437,7 @@ Vector2 GameGUI::calculateTilePosition(int x, int y) {
     return Vector2{
         .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize) + 
                                     kGapSize + ((kGapSize + kTileSize) * x),
-        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) + 
+        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) - 40 + 
                                     kGapSize + ((kGapSize + kTileSize) * y),
     };
 }

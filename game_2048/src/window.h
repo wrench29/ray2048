@@ -8,7 +8,7 @@
 
 const int kFontSize = 40;
 
-const unsigned int kWindowWidth = 1280;
+const unsigned int kWindowWidth = 1000;
 const unsigned int kWindowHeight = 900;
 
 const int kFramerate = 144;
