@@ -72,15 +72,15 @@ jobs:
       if: matrix.platform_type == 'windows'
       run: |
         mkdir release;
-        cp ./out/build/x64-release-windows/2048_with_raylib/2048_with_raylib.exe release/;
-        cp ./out/build/x64-release-windows/2048_with_raylib/raylib.dll release/;
+        cp ./out/build/x64-release-windows/game_2048/game_2048.exe release/;
+        cp ./out/build/x64-release-windows/game_2048/raylib.dll release/;
         Compress-Archive -Path release/* -DestinationPath ray2048.windows.zip
 
     - name: Create Linux artifact
       if: matrix.platform_type == 'linux'
       run: |
         mkdir release &&
-        cp ./out/build/x64-release-linux/2048_with_raylib/2048_with_raylib release/ &&
+        cp ./out/build/x64-release-linux/game_2048/game_2048 release/ &&
         zip ray2048.linux.zip release/*
 
     - name: Upload artifact
