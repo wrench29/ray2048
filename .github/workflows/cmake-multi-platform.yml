@@ -66,8 +66,7 @@ jobs:
       with:
         configurePreset: 'x64-release-${{ matrix.platform_type }}'
         configurePresetAdditionalArgs: "['-DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}', '-DCMAKE_C_COMPILER=${{ matrix.c_compiler }}', '-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}']"
-        buildPreset: 'x64-release-${{ matrix.platform_type }}'
-        buildPresetAdditionalArgs: "['--config Release']"
+        buildPreset: 'build-x64-release-${{ matrix.platform_type }}'
 
     - name: Create Windows artifact
       if: matrix.platform_type == 'windows'
