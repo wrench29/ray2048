@@ -25,7 +25,7 @@
     },
     {
       "name": "linux-base",
-      "hidden": "true",
+      "hidden": true,
       "inherits": "general-base",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
