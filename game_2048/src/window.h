@@ -143,6 +143,11 @@ private:
         "You lose :( Press \"RESET\" to try again.";
 	const std::string scoreText = "Score: ";
 
+	Vector2 gameFailedTextPosition;
+	Vector2 scoreTextPosition;
+
+	Vector2 gameFieldPosition;
+
 	Vector2 backButtonPosition;
 	Vector2 backButtonSize;
 

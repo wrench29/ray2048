@@ -198,6 +198,21 @@ GameGUI::GameGUI() : isBackButtonHovered(true), isCursorPointing(false),
         .y = kWindowHeight - 75
     };
     hoveredButtonColor = { .r = 230, .g = 100, .b = 100, .a = 255 };
+
+    Vector2 gameFailedTextSize = MeasureTextEx(GetFontDefault(),
+        gameFailedText.c_str(), kFontSize, 3);
+    gameFailedTextPosition = {
+        .x = CENTERED_ELEMENT_START(kWindowWidth, gameFailedTextSize.x),
+        .y = kWindowHeight - 100 - gameFailedTextSize.y,
+    };
+    scoreTextPosition = {
+        .x = 300,
+        .y = 30
+    };
+    gameFieldPosition = {
+        .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize),
+        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) - 40,
+    };
 }
 
 bool GameGUI::getIsResetAsked() {
@@ -242,8 +257,8 @@ void GameGUI::draw() {
     drawButton(resetButtonText, resetButtonSize, resetButtonPosition, 
                resetButtonColor);
     Rectangle mainFieldBackground{
-        .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize),
-        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) - 40,
+        .x = gameFieldPosition.x,
+        .y = gameFieldPosition.y,
         .width = kFieldSize, 
         .height = kFieldSize,
     };
@@ -271,22 +286,11 @@ void GameGUI::draw() {
                      (int)textPosition.y, kFontSize + 8, WHITE);
         }
     }
-    Vector2 scorePosition{
-        .x = 300,
-        .y = 30
-    };
-    DrawText(getScoreText().c_str(), (int)scorePosition.x,
-        (int)scorePosition.y, kFontSize, BLACK);
+    DrawText(getScoreText().c_str(), (int)scoreTextPosition.x,
+        (int)scoreTextPosition.y, kFontSize, BLACK);
     if (!isGameFailed) {
         return;
     }
-    Vector2 gameFailedTextSize = MeasureTextEx(GetFontDefault(), 
-                                     gameFailedText.c_str(), kFontSize, 
-                                     3);
-    Vector2 gameFailedTextPosition{
-        .x = CENTERED_ELEMENT_START(kWindowWidth, gameFailedTextSize.x),
-        .y = kWindowHeight - 100 - gameFailedTextSize.y,
-    };
     DrawText(gameFailedText.c_str(), (int)gameFailedTextPosition.x,
              (int)gameFailedTextPosition.y, kFontSize, BLACK);
 }
@@ -452,10 +456,8 @@ std::string GameGUI::getTileText(GameTileType tileType) {
 
 Vector2 GameGUI::calculateTilePosition(int x, int y) {
     return Vector2{
-        .x = CENTERED_ELEMENT_START(kWindowWidth, kFieldSize) + 
-                                    kGapSize + ((kGapSize + kTileSize) * x),
-        .y = CENTERED_ELEMENT_START(kWindowHeight, kFieldSize) - 40 + 
-                                    kGapSize + ((kGapSize + kTileSize) * y),
+        .x = gameFieldPosition.x + kGapSize + ((kGapSize + kTileSize) * x),
+        .y = gameFieldPosition.y + kGapSize + ((kGapSize + kTileSize) * y),
     };
 }
 
