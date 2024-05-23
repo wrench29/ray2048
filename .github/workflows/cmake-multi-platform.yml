@@ -106,16 +106,10 @@ jobs:
       with:
         name: release_url
 
-    - name: Get Release File Name & Upload URL on Linux
-      if: matrix.platform_type == 'linux'
+    - name: Get Release File Name & Upload URL
+      id: get_release_info
       run: |
         value=`cat release_url/release_url.txt`
-        echo "upload_url=$value" >> $GITHUB_OUTPUT
-
-    - name: Get Release File Name & Upload URL on Windows
-      if: matrix.platform_type == 'windows'
-      run: |
-        value=`type release_url/release_url.txt`
         echo "upload_url=$value" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
@@ -124,7 +118,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: $upload_url
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
         asset_path: ./ray2048.${{ matrix.platform_type }}.zip
         asset_name: ray2048.${{ matrix.platform_type }}.zip
         asset_content_type: application/x-zip
