@@ -7,6 +7,8 @@
 
 #include <raylib.h>
 
+#include "widgets.h"
+
 const int kFontSize = 40;
 
 const unsigned int kWindowWidth = 1000;
@@ -72,28 +74,12 @@ public:
 class MainMenuGUI : public IGUIScreen {
 private:
 	const std::string logoText = "The 2048 Game";
-	const std::string playButtonText = "PLAY";
-	const std::string settingsButtonText = "SETTINGS";
-	const std::string exitButtonText = "EXIT";
 
 	Vector2 logoTextPosition;
 
-	Vector2 playButtonPosition;
-	Vector2 playButtonSize;
-	
-	Vector2 settingsButtonPosition;
-	Vector2 settingsButtonSize;
-
-	Vector2 exitButtonPosition;
-	Vector2 exitButtonSize;
-
-	bool isPlayButtonHovered;
-	bool isSettingsButtonHovered;
-	bool isExitButtonHovered;
-
-	Color hoveredButtonColor;
-
-	bool isCursorPointing;
+	Button playButton;
+	Button settingsButton;
+	Button exitButton;
 
 public:
 	MainMenuGUI();
@@ -109,18 +95,10 @@ public:
 class SettingsGUI : public IGUIScreen {
 private:
 	const std::string screenText = "Currently there are no settings.";
-	const std::string backButtonText = "<- Back";
 
 	Vector2 screenTextPosition;
 
-	Vector2 backButtonPosition;
-	Vector2 backButtonSize;
-
-	bool isBackButtonHovered;
-
-	Color hoveredButtonColor;
-
-	bool isCursorPointing;
+	Button backButton;
 
 public:
 	SettingsGUI();
@@ -137,29 +115,17 @@ private:
 	const float kGapSize = 16;
 	const float kFieldSize = (kTileSize * 4) + (kGapSize * 5);
 
-	const std::string backButtonText = "<- Back";
-    const std::string resetButtonText = "RESET";
     const std::string gameFailedText = 
         "You lose :( Press \"RESET\" to try again.";
 	const std::string scoreText = "Score: ";
+
+	Button backButton;
+	Button resetButton;
 
 	Vector2 gameFailedTextPosition;
 	Vector2 scoreTextPosition;
 
 	Vector2 gameFieldPosition;
-
-	Vector2 backButtonPosition;
-	Vector2 backButtonSize;
-
-    Vector2 resetButtonPosition;
-    Vector2 resetButtonSize;
-
-	bool isBackButtonHovered;
-    bool isResetButtonHovered;
-
-	Color hoveredButtonColor;
-
-	bool isCursorPointing;
 
     bool isGameFailed;
     bool isResetAsked;

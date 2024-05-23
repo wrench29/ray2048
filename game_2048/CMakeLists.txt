@@ -9,7 +9,8 @@ add_executable(game_2048
 	"src/game.h"
 	"src/logic.cc"
 	"src/logic.h"
-)
+	"src/widgets.cc"
+	"src/widgets.h")
 
 target_link_libraries(game_2048 PRIVATE raylib)
 

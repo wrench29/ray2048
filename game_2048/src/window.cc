@@ -28,35 +28,6 @@ void drawText(std::string text, Vector2 position) {
     DrawText(text.c_str(), (int)position.x, (int)position.y, kFontSize, BLACK);
 }
 
-void drawButton(std::string text, Vector2 size, Vector2 position, Color color) {
-    Vector2 textSize = MeasureTextEx(GetFontDefault(), text.c_str(), kFontSize, 3);
-    Vector2 textPosition{
-        .x = (size.x - textSize.x) / 2 + position.x,
-        .y = (size.y - textSize.y) / 2 + position.y,
-    };
-    Rectangle rectangle = {
-        .x = position.x,
-        .y = position.y,
-        .width = size.x,
-        .height = size.y,
-    };
-    DrawRectangleRounded(rectangle, 0.3f, 5, color);
-    DrawText(text.c_str(), (int)textPosition.x, (int)textPosition.y, kFontSize, WHITE);
-}
-
-bool isButtonHovered(Vector2 position, Vector2 size) {
-    Vector2 mousePosition = GetMousePosition();
-    return mousePosition.x >= position.x && mousePosition.x <= (position.x + size.x) &&
-        mousePosition.y >= position.y && mousePosition.y <= (position.y + size.y);
-}
-
-bool isButtonClicked(Vector2 position, Vector2 size) {
-    if (!IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        return false;
-    }
-    return isButtonHovered(position, size);
-}
-
 GameWindow::GameWindow(): currentScreen(nullptr), forcedClose(false) {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetTargetFPS(kFramerate);
@@ -91,113 +62,97 @@ GameWindow::~GameWindow() {
     CloseWindow();
 }
 
-MainMenuGUI::MainMenuGUI() : isPlayButtonHovered(false), isSettingsButtonHovered(false), 
-        isExitButtonHovered(false), isCursorPointing(false) {
+MainMenuGUI::MainMenuGUI() {
     Vector2 buttonSize = { .x = 250, .y = 50 };
     float buttonLeftOffset = CENTERED_ELEMENT_START(kWindowWidth, buttonSize.x);
-    playButtonSize = buttonSize;
-    settingsButtonSize = buttonSize;
-    exitButtonSize = buttonSize;
-    playButtonPosition = { .x = buttonLeftOffset, .y = 320 };
-    settingsButtonPosition = { .x = buttonLeftOffset, .y = playButtonPosition.y + 70 };
-    exitButtonPosition = { .x = buttonLeftOffset, .y = settingsButtonPosition.y + 70 };
+
+    Vector2 playButtonPosition = { .x = buttonLeftOffset, .y = 320 };
+    Vector2 settingsButtonPosition = { .x = buttonLeftOffset, .y = playButtonPosition.y + 70 };
+    Vector2 exitButtonPosition = { .x = buttonLeftOffset, .y = settingsButtonPosition.y + 70 };
+    
+    playButton.setText("PLAY");
+    playButton.setPosition(playButtonPosition);
+    playButton.setSize(buttonSize);
+
+    settingsButton.setText("SETTINGS");
+    settingsButton.setPosition(settingsButtonPosition);
+    settingsButton.setSize(buttonSize);
+
+    exitButton.setText("EXIT");
+    exitButton.setPosition(exitButtonPosition);
+    exitButton.setSize(buttonSize);
+
     logoTextPosition = { .x = CENTERED_ELEMENT_START(kWindowWidth, getTextSize(logoText).x), .y = 150 };
-    hoveredButtonColor = { .r = 230, .g = 100, .b = 100, .a = 255 };
 }
 
 void MainMenuGUI::draw() {
-    Color playButtonColor = RED;
-    Color settingsButtonColor = RED;
-    Color exitButtonColor = RED;
-    if (isPlayButtonHovered) {
-        playButtonColor = hoveredButtonColor;
-    }
-    if (isSettingsButtonHovered) {
-        settingsButtonColor = hoveredButtonColor;
-    }
-    if (isExitButtonHovered) {
-        exitButtonColor = hoveredButtonColor;
-    }
     drawText(logoText, logoTextPosition);
-    drawButton(playButtonText, playButtonSize, playButtonPosition, playButtonColor);
-    drawButton(settingsButtonText, settingsButtonSize, settingsButtonPosition, settingsButtonColor);
-    drawButton(exitButtonText, exitButtonSize, exitButtonPosition, exitButtonColor);
+    playButton.draw();
+    settingsButton.draw();
+    exitButton.draw();
 }
 
 void MainMenuGUI::process() {
-    bool isButtonsHovered = isPlayButtonHovered || isSettingsButtonHovered || isExitButtonHovered;
-    if (isButtonsHovered && !isCursorPointing) {
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-        isCursorPointing = true;
-    }
-    if (!isButtonsHovered && isCursorPointing) {
-        SetMouseCursor(MOUSE_CURSOR_ARROW);
-        isCursorPointing = false;
-    }
-    isPlayButtonHovered = isButtonHovered(playButtonPosition, playButtonSize);
-    isSettingsButtonHovered = isButtonHovered(settingsButtonPosition, settingsButtonSize);
-    isExitButtonHovered = isButtonHovered(exitButtonPosition, exitButtonSize);
+    playButton.process();
+    settingsButton.process();
+    exitButton.process();
 }
 
 bool MainMenuGUI::isPlayButtonClicked() const {
-    return isButtonClicked(playButtonPosition, playButtonSize);
+    return playButton.getIsClicked();
 }
 
 bool MainMenuGUI::isSettingsButtonClicked() const {
-    return isButtonClicked(settingsButtonPosition, settingsButtonSize);
+    return settingsButton.getIsClicked();
 }
 
 bool MainMenuGUI::isExitButtonClicked() const {
-    return isButtonClicked(exitButtonPosition, exitButtonSize);
+    return exitButton.getIsClicked();
 }
 
-SettingsGUI::SettingsGUI() : isBackButtonHovered(true), isCursorPointing(false) {
+SettingsGUI::SettingsGUI() {
     Vector2 textSize = getTextSize(screenText);
     screenTextPosition = {
         .x = CENTERED_ELEMENT_START(kWindowWidth, textSize.x),
         .y = CENTERED_ELEMENT_START(kWindowHeight, textSize.y)
     };
-    backButtonPosition = { .x = 25, .y = 25 };
-    backButtonSize = { .x = 200, .y = 50 };
-    hoveredButtonColor = { .r = 230, .g = 100, .b = 100, .a = 255 };
+    Vector2 backButtonPosition = { .x = 25, .y = 25 };
+    Vector2 backButtonSize = { .x = 200, .y = 50 };
+    
+    backButton.setText("<- BACK");
+    backButton.setPosition(backButtonPosition);
+    backButton.setSize(backButtonSize);
 }
 
 void SettingsGUI::draw() {
-    Color backButtonColor = RED;
-    if (isBackButtonHovered) {
-        backButtonColor = hoveredButtonColor;
-    }
     drawText(screenText, screenTextPosition);
-    drawButton(backButtonText, backButtonSize, backButtonPosition, backButtonColor);
+    backButton.draw();
 }
 
 void SettingsGUI::process() {
-    if (isBackButtonHovered && !isCursorPointing) {
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-        isCursorPointing = true;
-    }
-    if (!isBackButtonHovered && isCursorPointing) {
-        SetMouseCursor(MOUSE_CURSOR_ARROW);
-        isCursorPointing = false;
-    }
-    isBackButtonHovered = isButtonHovered(backButtonPosition, backButtonSize);
+    backButton.process();
 }
 
 bool SettingsGUI::isBackButtonClicked() const {
-    return isButtonClicked(backButtonPosition, backButtonSize);
+    return backButton.getIsClicked();
 }
 
-GameGUI::GameGUI() : isBackButtonHovered(true), isCursorPointing(false), 
-                     tiles{}, isGameFailed(false), isResetAsked(false),
-                     isResetButtonHovered(false), score(0) {
-    backButtonPosition = { .x = 25, .y = 25 };
-    backButtonSize = { .x = 200, .y = 50 };
-    resetButtonSize = { .x = 250, .y = 50 };
-    resetButtonPosition = { 
+GameGUI::GameGUI() : tiles{}, isGameFailed(false), isResetAsked(false), score(0) {
+    Vector2 backButtonPosition = { .x = 25, .y = 25 };
+    Vector2 backButtonSize = { .x = 200, .y = 50 };
+    Vector2 resetButtonSize = { .x = 250, .y = 50 };
+    Vector2 resetButtonPosition = { 
         .x = CENTERED_ELEMENT_START(kWindowWidth, resetButtonSize.x), 
         .y = kWindowHeight - 75
     };
-    hoveredButtonColor = { .r = 230, .g = 100, .b = 100, .a = 255 };
+    
+    backButton.setText("<- BACK");
+    backButton.setPosition(backButtonPosition);
+    backButton.setSize(backButtonSize);
+
+    resetButton.setText("RESET");
+    resetButton.setPosition(resetButtonPosition);
+    resetButton.setSize(resetButtonSize);
 
     Vector2 gameFailedTextSize = MeasureTextEx(GetFontDefault(),
         gameFailedText.c_str(), kFontSize, 3);
@@ -244,18 +199,8 @@ std::string GameGUI::getScoreText() {
 }
 
 void GameGUI::draw() {
-    Color backButtonColor = RED;
-    Color resetButtonColor = RED;
-    if (isBackButtonHovered) {
-        backButtonColor = hoveredButtonColor;
-    }
-    if (isResetButtonHovered) {
-        resetButtonColor = hoveredButtonColor;
-    }
-    drawButton(backButtonText, backButtonSize, backButtonPosition, 
-               backButtonColor);
-    drawButton(resetButtonText, resetButtonSize, resetButtonPosition, 
-               resetButtonColor);
+    backButton.draw();
+    resetButton.draw();
     Rectangle mainFieldBackground{
         .x = gameFieldPosition.x,
         .y = gameFieldPosition.y,
@@ -296,19 +241,9 @@ void GameGUI::draw() {
 }
 
 void GameGUI::process() {
-    if ((isBackButtonHovered || isResetButtonHovered) && !isCursorPointing) {
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-        isCursorPointing = true;
-    }
-    if (!isBackButtonHovered && !isResetButtonHovered && isCursorPointing) {
-        SetMouseCursor(MOUSE_CURSOR_ARROW);
-        isCursorPointing = false;
-    }
-    isBackButtonHovered = isButtonHovered(backButtonPosition, backButtonSize);
-    isResetButtonHovered = isButtonHovered(resetButtonPosition, 
-                                           resetButtonSize);
-    if (!isResetAsked && isButtonClicked(resetButtonPosition, 
-                                         resetButtonSize)) {
+    backButton.process();
+    resetButton.process();
+    if (!isResetAsked && resetButton.getIsClicked()) {
         isResetAsked = true;
     }
     for (int i = ((int)animations.size() - 1); i >= 0; i--) {
@@ -332,7 +267,7 @@ void GameGUI::process() {
 }
 
 bool GameGUI::isBackButtonClicked() const {
-    return isButtonClicked(backButtonPosition, backButtonSize);
+    return backButton.getIsClicked();
 }
 
 void GameGUI::updateScore(int newScore) {
