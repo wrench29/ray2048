@@ -107,26 +107,16 @@ jobs:
         name: release_url
 
     - name: Get Release File Name & Upload URL on Linux
-      id: get_release_info_linux
       if: matrix.platform_type == 'linux'
       run: |
-        echo ::set-output name=file_name::${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/v} # RepositoryName-v1.0.0
-        value=`cat release_url/release_url.txt`
-        echo ::set-output name=upload_url::$value
-      env:
-        TAG_REF_NAME: ${{ github.ref }}
-        REPOSITORY_NAME: ${{ github.repository }}
+        echo "upload_url=" >> "$GITHUB_ENV"
+        cat release_url/release_url.txt >> "$GITHUB_ENV"
 
     - name: Get Release File Name & Upload URL on Windows
-      id: get_release_info_windows
       if: matrix.platform_type == 'windows'
       run: |
-        echo ::set-output name=file_name::${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/v} # RepositoryName-v1.0.0
-        value=`type release_url/release_url.txt`
-        echo ::set-output name=upload_url::$value
-      env:
-        TAG_REF_NAME: ${{ github.ref }}
-        REPOSITORY_NAME: ${{ github.repository }}
+        echo "upload_url=" >> "$GITHUB_ENV"
+        type release_url/release_url.txt >> "$GITHUB_ENV"
 
     - name: Upload Release Asset
       id: upload-release-asset 
@@ -134,7 +124,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        upload_url: $upload_url
         asset_path: ./ray2048.${{ matrix.platform_type }}.zip
         asset_name: ray2048.${{ matrix.platform_type }}.zip
         asset_content_type: application/x-zip
