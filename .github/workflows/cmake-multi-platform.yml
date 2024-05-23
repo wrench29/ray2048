@@ -60,6 +60,14 @@ jobs:
         configurePreset: 'x64-release-${{ matrix.platform_type }}'
         configurePresetAdditionalArgs: "['-DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}', '-DCMAKE_C_COMPILER=${{ matrix.c_compiler }}', '-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}']"
         buildPresetAdditionalArgs: "['--config Release']"
+    
+    - name: Run CMake build
+      uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'x64-release-${{ matrix.platform_type }}'
+        configurePresetAdditionalArgs: "['-DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}', '-DCMAKE_C_COMPILER=${{ matrix.c_compiler }}', '-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}']"
+        buildPreset: 'x64-release-${{ matrix.platform_type }}'
+        buildPresetAdditionalArgs: "['--config Release']"
 
     - name: Create Windows artifact
       if: matrix.platform_type == 'windows'
@@ -73,8 +81,7 @@ jobs:
       if: matrix.platform_type == 'linux'
       run: |
         mkdir release &&
-        cp ./out/build/x64-release-linux/2048_with_raylib/2048_with_raylib.exe release/ &&
-        cp ./out/build/x64-release-linux/2048_with_raylib/raylib.dll release/ &&
+        cp ./out/build/x64-release-linux/2048_with_raylib/2048_with_raylib release/ &&
         zip ray2048.linux.zip release/*
 
     - name: Upload artifact
