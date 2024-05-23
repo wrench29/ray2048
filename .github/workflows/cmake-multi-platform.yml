@@ -39,6 +39,10 @@ jobs:
             platform_type: 'windows'
 
     steps:
+    - name: Install Linux dependencies
+      if: matrix.platform_type == 'linux'
+      run: sudo apt update && sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+    
     - uses: actions/checkout@v4
     
     - uses: lukka/get-cmake@latest
