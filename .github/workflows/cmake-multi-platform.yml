@@ -41,7 +41,8 @@ jobs:
     steps:
     - name: Install Linux dependencies
       if: matrix.platform_type == 'linux'
-      run: sudo apt update && sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+      run: |
+        sudo apt update && sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config zip
     
     - uses: actions/checkout@v4
     
@@ -59,3 +60,29 @@ jobs:
         configurePreset: 'x64-release-${{ matrix.platform_type }}'
         configurePresetAdditionalArgs: "['-DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}', '-DCMAKE_C_COMPILER=${{ matrix.c_compiler }}', '-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}']"
         buildPresetAdditionalArgs: "['--config Release']"
+
+    - name: Create Windows artifact
+      if: matrix.platform_type == 'windows'
+      run: |
+        mkdir release;
+        cp ./out/build/x64-release-windows/2048_with_raylib/2048_with_raylib.exe release/;
+        cp ./out/build/x64-release-windows/2048_with_raylib/raylib.dll release/;
+        Compress-Archive -Path release/* -DestinationPath ray2048.windows.zip
+
+    - name: Create Linux artifact
+      if: matrix.platform_type == 'linux'
+      run: |
+        mkdir release &&
+        cp ./out/build/x64-release-linux/2048_with_raylib/2048_with_raylib.exe release/ &&
+        cp ./out/build/x64-release-linux/2048_with_raylib/raylib.dll release/ &&
+        zip ray2048.linux.zip release/*
+
+    - name: Upload artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ray2048.${{ martix.platform_type }}.zip
+        asset_name: ray2048.${{ martix.platform_type }}.zip
+        asset_content_type: application/x-zip
