@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include <raylib.h>
 
@@ -140,6 +141,7 @@ private:
     const std::string resetButtonText = "RESET";
     const std::string gameFailedText = 
         "You lose :( Press \"RESET\" to try again.";
+	const std::string scoreText = "Score: ";
 
 	Vector2 backButtonPosition;
 	Vector2 backButtonSize;
@@ -157,10 +159,13 @@ private:
     bool isGameFailed;
     bool isResetAsked;
 
+	int score;
+
 	GameTileType tiles[4][4]; // usage: tiles[0][2] where 0 - Y, 2 - X. 
 	std::vector<TileMovementAnimation> animations;
 	std::vector<TileWithPosition> pendingTiles;
 
+	std::string getScoreText();
 	Vector2 calculateTilePosition(int x, int y);
 	Color getTileColor(GameTileType tileType);
 	std::string getTileText(GameTileType tileType);
@@ -177,6 +182,7 @@ public:
 	void setTile(int x, int y, GameTileType tileType);
 	void moveTile(int fromX, int fromY, int toX, int toY, 
                   GameTileType oldTile, GameTileType newTile);
+	void updateScore(int newScore);
     bool getIsResetAsked();
     void setGameFailed();
 	void reset();

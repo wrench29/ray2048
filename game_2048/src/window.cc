@@ -189,7 +189,7 @@ bool SettingsGUI::isBackButtonClicked() const {
 
 GameGUI::GameGUI() : isBackButtonHovered(true), isCursorPointing(false), 
                      tiles{}, isGameFailed(false), isResetAsked(false),
-                     isResetButtonHovered(false) {
+                     isResetButtonHovered(false), score(0) {
     backButtonPosition = { .x = 25, .y = 25 };
     backButtonSize = { .x = 200, .y = 50 };
     resetButtonSize = { .x = 250, .y = 50 };
@@ -219,6 +219,13 @@ void GameGUI::reset() {
     pendingTiles.clear();
     animations.clear();
     isGameFailed = false;
+    score = 0;
+}
+
+std::string GameGUI::getScoreText() {
+    std::ostringstream scoreBuilder;
+    scoreBuilder << scoreText << score;
+    return scoreBuilder.str();
 }
 
 void GameGUI::draw() {
@@ -264,6 +271,12 @@ void GameGUI::draw() {
                      (int)textPosition.y, kFontSize + 8, WHITE);
         }
     }
+    Vector2 scorePosition{
+        .x = 300,
+        .y = 30
+    };
+    DrawText(getScoreText().c_str(), (int)scorePosition.x,
+        (int)scorePosition.y, kFontSize, BLACK);
     if (!isGameFailed) {
         return;
     }
@@ -274,7 +287,7 @@ void GameGUI::draw() {
         .x = CENTERED_ELEMENT_START(kWindowWidth, gameFailedTextSize.x),
         .y = kWindowHeight - 100 - gameFailedTextSize.y,
     };
-    DrawText(gameFailedText.c_str(), (int)gameFailedTextPosition.x, 
+    DrawText(gameFailedText.c_str(), (int)gameFailedTextPosition.x,
              (int)gameFailedTextPosition.y, kFontSize, BLACK);
 }
 
@@ -316,6 +329,10 @@ void GameGUI::process() {
 
 bool GameGUI::isBackButtonClicked() const {
     return isButtonClicked(backButtonPosition, backButtonSize);
+}
+
+void GameGUI::updateScore(int newScore) {
+    score = newScore;
 }
 
 void GameGUI::setTile(int x, int y, GameTileType tileType) {

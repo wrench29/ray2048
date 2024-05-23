@@ -1,6 +1,6 @@
 #include "logic.h"
 
-GameField::GameField() : tiles{}, isInitialized(false) {
+GameField::GameField() : tiles{}, isInitialized(false), score(0) {
 	std::random_device dev;
 	randomGenerator = std::mt19937(dev());
 }
@@ -17,6 +17,7 @@ void GameField::reset() {
             tiles[y][x] = GameTileType::NoTile;
         }
     }
+	score = 0;
     isInitialized = false;
 }
 
@@ -93,6 +94,27 @@ std::vector<TileMovement> GameField::requestMovement(UserMovement movement) {
 		movedTiles = verticalMove(true, true);
 		break;
 	}
+	}
+	std::vector<TileMovement> uniqueMoves;
+	for (int i = 0; i < movedTiles.size(); i++) {
+		bool isUnique = true;
+		for (int j = 0; j < uniqueMoves.size(); j++) {
+			if (movedTiles[i].toX == uniqueMoves[j].toX && movedTiles[i].toY == uniqueMoves[j].toY) {
+				isUnique = false;
+				break;
+			}
+		}
+		if (isUnique) {
+			uniqueMoves.push_back(movedTiles[i]);
+		}
+	}
+	for (auto& tile : uniqueMoves) {
+		int oldTileValue = (int)tile.oldTile;
+		int newTileValue = (int)tile.newTile;
+		if (oldTileValue != 0 && oldTileValue != newTileValue) {
+			int scoreUp = pow(2, newTileValue);
+			score += scoreUp;
+		}
 	}
 	return movedTiles;
 }

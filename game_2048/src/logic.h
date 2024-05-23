@@ -31,6 +31,8 @@ private:
 	GameTileType tiles[4][4];
 	bool isInitialized;
 
+	int score;
+
 	std::mt19937 randomGenerator;
 
 	int randomNumber(int min, int max);
@@ -50,6 +52,7 @@ public:
 	bool isGameFailed();
 	bool isGameInitialized() const { return isInitialized; }
     void reset();
+	int getScore() const { return score; }
 };
 
 #endif // GAME_2048_LOGIC_H

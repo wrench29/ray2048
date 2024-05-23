@@ -75,6 +75,7 @@ void Game2048::processGame() {
 				gameScreen.setTile(spawnedTile.x, spawnedTile.y, 
                                    spawnedTile.tileType);
 			}
+			gameScreen.updateScore(gameField.getScore());
 		}
         if (gameField.isGameFailed()) {
             gameScreen.setGameFailed();
