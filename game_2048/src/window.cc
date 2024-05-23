@@ -198,6 +198,25 @@ std::string GameGUI::getScoreText() {
     return scoreBuilder.str();
 }
 
+void GameGUI::drawTile(TileWithAbsolutePosition tile) {
+    Rectangle tileRectangle{
+            .x = tile.x,
+            .y = tile.y,
+            .width = kTileSize,
+            .height = kTileSize,
+    };
+    Color tileColor = getTileColor(tile.tileType);
+    DrawRectangleRounded(tileRectangle, 0.3f, 5, tileColor);
+    std::string tileText = getTileText(tile.tileType);
+    if (tileText.size() != 0) {
+        Vector2 textSize = MeasureTextEx(GetFontDefault(),
+            tileText.c_str(), kFontSize + 8, 3);
+        int textPosX = (kTileSize - textSize.x) / 2 + tileRectangle.x;
+        int textPosY = (kTileSize - textSize.y) / 2 + tileRectangle.y;
+        DrawText(tileText.c_str(), textPosX, textPosY, kFontSize + 8, WHITE);
+    }
+}
+
 void GameGUI::draw() {
     backButton.draw();
     resetButton.draw();
@@ -210,26 +229,7 @@ void GameGUI::draw() {
     DrawRectangleRounded(mainFieldBackground, 0.05f, 20, COLOR(160, 160, 160));
     std::vector<TileWithAbsolutePosition> tilesToDraw = getCurrentTiles();
     for (auto& tile : tilesToDraw) {
-        Rectangle tileRectangle{
-            .x = tile.x,
-            .y = tile.y,
-            .width = kTileSize,
-            .height = kTileSize,
-        };
-        Color tileColor = getTileColor(tile.tileType);
-        DrawRectangleRounded(tileRectangle, 0.3f, 5, tileColor);
-        std::string tileText = getTileText(tile.tileType);
-        if (tileText.size() != 0) {
-            Vector2 textSize = MeasureTextEx(GetFontDefault(), 
-                                             tileText.c_str(), kFontSize + 8, 
-                                             3);
-            Vector2 textPosition{
-                .x = (kTileSize - textSize.x) / 2 + tileRectangle.x,
-                .y = (kTileSize - textSize.y) / 2 + tileRectangle.y,
-            };
-            DrawText(tileText.c_str(), (int)textPosition.x, 
-                     (int)textPosition.y, kFontSize + 8, WHITE);
-        }
+        drawTile(tile);
     }
     DrawText(getScoreText().c_str(), (int)scoreTextPosition.x,
         (int)scoreTextPosition.y, kFontSize, BLACK);

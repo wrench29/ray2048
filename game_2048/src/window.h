@@ -141,6 +141,7 @@ private:
 	Color getTileColor(GameTileType tileType);
 	std::string getTileText(GameTileType tileType);
 	std::vector<TileWithAbsolutePosition> getCurrentTiles();
+	void drawTile(TileWithAbsolutePosition tile);
 
 public:
 	GameGUI();
