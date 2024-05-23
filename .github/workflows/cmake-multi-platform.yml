@@ -13,25 +13,21 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
-      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
       fail-fast: false
 
-      # Set up a matrix to run the following 3 configurations:
-      # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
-      # 2. <Linux, Release, latest GCC compiler toolchain on the default runner image, default generator>
-      # 3. <Linux, Release, latest Clang compiler toolchain on the default runner image, default generator>
-      #
-      # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         vcpkgCommitId: ['943c5ef1c8f6b5e6ced092b242c8299caae2ff01']
+        platform_type: ['linux', 'windows']
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
         c_compiler: [clang, cl]
         include:
           - os: windows-latest
+            platform_type: 'windows'
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
+            platform_type: 'linux'
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
@@ -54,6 +50,6 @@ jobs:
     - name: Run CMake
       uses: lukka/run-cmake@v10
       with:
-        configurePreset: 'x64-release-windows'
+        configurePreset: 'x64-release-${{ matrix.platform_type }}'
         configurePresetAdditionalArgs: "['-DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}', '-DCMAKE_C_COMPILER=${{ matrix.c_compiler }}', '-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}']"
         buildPresetAdditionalArgs: "['--config Release']"
