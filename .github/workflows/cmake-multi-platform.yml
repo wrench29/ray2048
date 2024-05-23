@@ -108,12 +108,14 @@ jobs:
 
     - name: Get Release File Name & Upload URL on Windows
       id: get_release_info_windows
+      if: matrix.platform_type == 'windows'
       run: |
         $value=type release_url/release_url.txt
         echo "upload_url=$value" >> $GITHUB_OUTPUT
 
     - name: Get Release File Name & Upload URL on Linux
       id: get_release_info_linux
+      if: matrix.platform_type == 'linux'
       run: |
         value=`cat release_url/release_url.txt`
         echo "upload_url=$value" >> $GITHUB_OUTPUT
