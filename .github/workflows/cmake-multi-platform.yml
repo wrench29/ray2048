@@ -23,11 +23,9 @@ jobs:
         c_compiler: [clang, cl]
         include:
           - os: windows-latest
-            platform_type: 'windows'
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
-            platform_type: 'linux'
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
@@ -35,6 +33,10 @@ jobs:
             c_compiler: clang
           - os: ubuntu-latest
             c_compiler: cl
+          - os: windows-latest
+            platform_type: 'linux'
+          - os: ubuntu-latest
+            platform_type: 'windows'
 
     steps:
     - uses: actions/checkout@v4
