@@ -109,14 +109,14 @@ jobs:
     - name: Get Release File Name & Upload URL on Linux
       if: matrix.platform_type == 'linux'
       run: |
-        echo "upload_url=" >> "$GITHUB_ENV"
-        cat release_url/release_url.txt >> "$GITHUB_ENV"
+        value=`cat release_url/release_url.txt`
+        echo "upload_url=$value" >> $GITHUB_OUTPUT
 
     - name: Get Release File Name & Upload URL on Windows
       if: matrix.platform_type == 'windows'
       run: |
-        echo "upload_url=" >> "$GITHUB_ENV"
-        type release_url/release_url.txt >> "$GITHUB_ENV"
+        value=`type release_url/release_url.txt`
+        echo "upload_url=$value" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
       id: upload-release-asset 
