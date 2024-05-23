@@ -111,7 +111,7 @@ jobs:
       if: matrix.platform_type == 'windows'
       run: |
         $value=type release_url/release_url.txt
-        $GITHUB_OUTPUT += "upload_url=$value"
+        echo "upload_url=$value" >> $ENV:GITHUB_OUTPUT
 
     - name: Get Release File Name & Upload URL on Linux
       id: get_release_info_linux
