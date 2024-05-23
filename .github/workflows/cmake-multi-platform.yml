@@ -55,5 +55,5 @@ jobs:
       uses: lukka/run-cmake@v10
       with:
         configurePreset: 'ninja-multi-vcpkg'
-        configurePresetAdditionalArgs: "[-DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}', '-DCMAKE_C_COMPILER=${{ matrix.c_compiler }}', '-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}']"
+        configurePresetAdditionalArgs: "['-DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}', '-DCMAKE_C_COMPILER=${{ matrix.c_compiler }}', '-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}']"
         buildPresetAdditionalArgs: "['--config Release']"
