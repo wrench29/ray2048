@@ -23,16 +23,13 @@ void GameField::reset() {
 
 std::vector<TileWithPosition> GameField::spawnNewTiles() {
 	std::vector<TileWithPosition> newTiles;
-	if (!isInitialized) {
-		isInitialized = true;
-	}
 	auto emptyTiles = getEmptyTiles();
 	if (emptyTiles.size() == 0) {
 		return newTiles;
 	}
-	int countOfTilesToSpawn = randomNumber(1, 2); // generate by random
+	int countOfTilesToSpawn = isInitialized ? 1 : 2;
 	for (int i = 0; i < countOfTilesToSpawn; i++) {
-		bool is4Tile = randomNumber(1, 10) > 7; // generate by random with 20% chance
+		bool is4Tile = randomNumber(1, 10) > 8; // generate by random with 10% chance
 		GameTileType tileToSpawn = is4Tile ? GameTileType::Tile4 : GameTileType::Tile2;
 		bool isReallyEmpty = false;
 		int randomIndex = 0;
@@ -55,6 +52,9 @@ std::vector<TileWithPosition> GameField::spawnNewTiles() {
 			.y = emptyY,
 			.tileType = tileToSpawn,
 		});
+	}
+	if (!isInitialized) {
+		isInitialized = true;
 	}
 	return newTiles;
 }
